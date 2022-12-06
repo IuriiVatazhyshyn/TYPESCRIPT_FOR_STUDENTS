@@ -3,7 +3,7 @@ interface User {
   age: number;
   roles: string[];
   createdAt: Date;
-  isDeleated: boolean
+  isDeleted: boolean
 }
 interface IRequest {
   method: HTTPMethods;
@@ -22,9 +22,13 @@ interface IObserver {
 interface Subscribe {
   unsubscribe(): void;
 }
+interface IError {
+  status: number;
+  message: string;
+}
 
-type HandleRequest = (request: any) => { status: HTTPStatuses.HTTP_STATUS_OK };
-type HandleError = (error: any) => { status: HTTPStatuses.HTTP_STATUS_INTERNAL_SERVER_ERROR };
+type HandleRequest = (request: IRequest) => { status: HTTPStatuses.HTTP_STATUS_OK };
+type HandleError = (error: IError) => { status: HTTPStatuses.HTTP_STATUS_INTERNAL_SERVER_ERROR };
 type HandleComplete = () => void;
 
 enum HTTPStatuses {
@@ -46,13 +50,13 @@ class Observer {
     this.isUnsubscribed = false;
   }
 
-  next(value: any): void {
+  next(value: IRequest): void {
     if (this.handlers.next && !this.isUnsubscribed) {
       this.handlers.next(value);
     }
   }
 
-  error(error: any): void {
+  error(error: IError): void {
     if (!this.isUnsubscribed) {
       if (this.handlers.error) {
         this.handlers.error(error);
@@ -121,7 +125,7 @@ const userMock = {
     'admin'
   ],
   createdAt: new Date(),
-  isDeleated: false,
+  isDeleted: false,
 };
 
 const requestsMock = [
@@ -142,13 +146,13 @@ const requestsMock = [
   }
 ];
 
-const handleRequest: HandleRequest = (request: any) => {
+const handleRequest: HandleRequest = (request: IRequest) => {
   // handling of request
-  return {status: HTTPStatuses.HTTP_STATUS_OK};
+  return { status: HTTPStatuses.HTTP_STATUS_OK };
 };
-const handleError: HandleError = (error: any) => {
+const handleError: HandleError = (error: IError) => {
   // handling of error
-  return {status: HTTPStatuses.HTTP_STATUS_INTERNAL_SERVER_ERROR};
+  return { status: HTTPStatuses.HTTP_STATUS_INTERNAL_SERVER_ERROR };
 };
 
 const handleComplete: HandleComplete = () => console.log('complete');
